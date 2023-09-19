@@ -34,6 +34,14 @@ const App = () => {
   const [users, setUsers] = useState(null);
   const [adminuser, setAdminuser] = useState(null);
 
+  const [targetpoint, setTargetpoint] = useState({ latitude: 0, longitude: 0 });
+
+
+  // for line and area snapping
+  const [coordinates, setCoordinates] = useState([]);
+
+
+
   let baseURL = "https://stchrom.tgb.software";
   let alt = null;
 
@@ -107,7 +115,13 @@ const App = () => {
 
 
   return (
-    <CartContext.Provider value={{ user, baseURL, formatDate, formatTime, alt, auth, setAuth, users, setUsers, adminuser, setAdminuser }}>
+    <CartContext.Provider value={{
+      user, baseURL, formatDate,
+      formatTime, alt, auth, setAuth, users, setUsers,
+      adminuser, setAdminuser,
+      targetpoint, setTargetpoint,
+      coordinates, setCoordinates
+    }}>
 
       <Router>
         <div>

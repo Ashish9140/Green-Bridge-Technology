@@ -390,3 +390,43 @@ th {
     text-align: center;
     font-size: 20px;
 }
+
+.iconp {
+    display: flex;
+    justify-content: space-between;
+}
+
+.icon {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.icon:hover {
+    transform: scale(1.1);
+    /* Adjust the scale factor as needed */
+}
+
+.marker {
+    font-size: 20px;
+    line-height: 1;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    /* background-color: red; */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    position: absolute;
+}
+
+.mapDiv {
+    display: flex;
+    justify-content: center;
+}
+
+.container2 {
+    height: 600px;
+}

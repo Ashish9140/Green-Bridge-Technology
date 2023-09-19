@@ -1,6 +1,5 @@
 import Sidebar from "../components/Data/Sidebar"
 
-
 const MySnaps = () => {
     return (
         <div>
@@ -10,7 +9,6 @@ const MySnaps = () => {
                     <img src="/images/logo2.png" alt="logo" className='logo' style={{ width: "200px", height: "200px" }} />
                 </div>
             </div>
-
             <footer>
                 © 2022 THE GREEN BRIDGE Ingenieurgesellschaft mbH
             </footer>
