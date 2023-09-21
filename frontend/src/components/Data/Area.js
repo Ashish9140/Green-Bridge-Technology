@@ -40,8 +40,16 @@ const Area = () => {
     }
 
     const handlePoint = (latitude, longitude) => {
+        // setTargetpoint({ latitude, longitude });
+        setMapLine(false);
+        const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        window.open(googleMapsUrl, "_blank");
+    }
+
+    const handleHoverClick = (element, latitude, longitude) => {
         setTargetpoint({ latitude, longitude });
         setMapLine(false);
+        console.log(element, latitude, longitude);
     }
 
     const handleArea = (latitude, longitude) => {
@@ -96,7 +104,9 @@ const Area = () => {
                                                                 <th>Latitude</th>
                                                                 <th>Longitude</th>
                                                                 <th>Timestamp</th>
-                                                                <th className="iconp">Altitude(in Meter) <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handleArea(element.latitude, element.longitude) }} /></th>
+                                                                <th className="iconp">Altitude(in Meter)
+                                                                    <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handleArea(element.latitude, element.longitude) }} />
+                                                                </th>
                                                             </tr>
                                                         </thead>
                                                         {
@@ -104,7 +114,7 @@ const Area = () => {
                                                                 if (item !== '')
                                                                     return (
                                                                         <tbody>
-                                                                            <tr>
+                                                                            <tr onClick={(e) => { handleHoverClick(e.target, item, element.longitude[index]) }}>
                                                                                 <td>{item}</td>
                                                                                 <td>{element.longitude[index]}</td>
                                                                                 <td>{element.timestamp[index]}</td>

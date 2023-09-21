@@ -1,58 +1,63 @@
-import { useEffect, useContext, useState } from "react";
+import React, { useEffect, useContext, useState, useRef } from "react";
 import { CartContext } from "../CartContext";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-const GMap = () => {
+const OSMMap = () => {
     const { targetpoint } = useContext(CartContext);
     const [map, setMap] = useState(null);
-    const [currentPosition, setCurrentPosition] = useState(null);
+    const markerRef = useRef(null);
 
     useEffect(() => {
-        // Initialize the map
-        const googleMap = new window.google.maps.Map(document.getElementById('map'), {
-            center: { lat: targetpoint.latitude, lng: targetpoint.longitude },
-            zoom: 8,
-        });
-        setMap(googleMap);
+        const latitude = parseFloat(targetpoint.latitude);
+        const longitude = parseFloat(targetpoint.longitude);
 
-        // Get the user's current location
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                console.log(latitude, longitude);
-                setCurrentPosition({ lat: latitude, lng: longitude });
-            },
-            (error) => {
-                console.error('Error getting current location:', error);
+        if (!map) {
+            const osmMap = L.map('map').setView([latitude, longitude], 18);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 40,
+            }).addTo(osmMap);
+
+            setMap(osmMap);
+
+            const customIcon = L.icon({
+                iconUrl: "/images/marker.png",
+                iconSize: [50, 50],
+                iconAnchor: [16, 32],
+            });
+
+            const targetMarker = L.marker([latitude, longitude], { icon: customIcon });
+            markerRef.current = targetMarker;
+
+            targetMarker.addTo(osmMap);
+
+        } else {
+            map.setView([latitude, longitude], 18);
+
+            if (markerRef.current) {
+                markerRef.current.setLatLng([latitude, longitude]);
+            } else {
+                const customIcon = L.icon({
+                    iconUrl: "/images/marker.png",
+                    iconSize: [50, 50],
+                    iconAnchor: [16, 32],
+                });
+
+                const targetMarker = L.marker([latitude, longitude], { icon: customIcon });
+                markerRef.current = targetMarker;
+                targetMarker.addTo(map);
             }
-        );
-    }, [targetpoint.latitude, targetpoint.longitude]);
+        }
+    }, [targetpoint, map]);
 
     useEffect(() => {
-        if (map && currentPosition && targetpoint.latitude && targetpoint.longitude) {
-            const directionsService = new window.google.maps.DirectionsService();
-            const directionsRenderer = new window.google.maps.DirectionsRenderer({
-                map: map,
-            });
-
-            const origin = new window.google.maps.LatLng(currentPosition.lat, currentPosition.lng);
-            const destination = new window.google.maps.LatLng(targetpoint.latitude, targetpoint.longitude);
-
-            // Request driving directions
-            const request = {
-                origin: origin,
-                destination: destination,
-                travelMode: window.google.maps.TravelMode.DRIVING,
-            };
-
-            directionsService.route(request, (response, status) => {
-                if (status === 'OK') {
-                    directionsRenderer.setDirections(response);
-                } else {
-                    console.error('Directions request failed:', status);
-                }
-            });
-        }
-    }, [map, currentPosition, targetpoint.latitude, targetpoint.longitude]);
+        return () => {
+            if (map) {
+                map.remove();
+            }
+        };
+    }, [map]);
 
     return (
         <div>
@@ -61,4 +66,4 @@ const GMap = () => {
     );
 };
 
-export default GMap;
+export default OSMMap;

@@ -1,51 +1,101 @@
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { CartContext } from "../CartContext";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-const MapLine = () => {
+const OSMMap = () => {
     const { coordinates } = useContext(CartContext);
-    const numericCoordinates = coordinates.map(coord => ({
-        lat: parseFloat(coord.lat),
-        lng: parseFloat(coord.lng)
-    }));
-    const mapRef = useRef(null);
-    const polylineRef = useRef(null);
+    const [map, setMap] = useState(null);
+    const markersRef = useRef([]);
+
+    // Function to update markers based on new coordinates
+    const updateMarkers = () => {
+        if (map) {
+            markersRef.current.forEach((marker) => {
+                map.removeLayer(marker);
+            });
+
+            markersRef.current = coordinates.map((point, index) => {
+                const pointLatitude = parseFloat(point.lat);
+                const pointLongitude = parseFloat(point.lng);
+
+                if (!isNaN(pointLatitude) && !isNaN(pointLongitude)) {
+                    const customIcon = L.divIcon({
+                        className: "custom-marker",
+                        html: `<div class="marker-label">${index + 1}</div>`,
+                        iconSize: [30, 30],
+                    });
+
+                    const marker = L.marker([pointLatitude, pointLongitude], {
+                        icon: customIcon,
+                    });
+                    marker.addTo(map);
+                    return marker;
+                } else {
+                    console.error(`Invalid coordinates for point: ${JSON.stringify(point)}`);
+                    return null;
+                }
+            });
+        }
+    };
 
     useEffect(() => {
-        if (!mapRef.current || numericCoordinates.length === 0) return;
+        if (!map && Array.isArray(coordinates) && coordinates.length > 0) {
+            const firstPoint = coordinates[0];
+            const latitude = parseFloat(firstPoint.lat);
+            const longitude = parseFloat(firstPoint.lng);
 
-        const bounds = new window.google.maps.LatLngBounds();
-        numericCoordinates.forEach((coordinate) => {
-            bounds.extend(new window.google.maps.LatLng(coordinate.lat, coordinate.lng));
-        });
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+                const osmMap = L.map("map").setView([latitude, longitude], 18);
 
-        const centerLat = bounds.getCenter().lat();
-        const centerLng = bounds.getCenter().lng();
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    maxZoom: 40,
+                }).addTo(osmMap);
 
-        const map = new window.google.maps.Map(mapRef.current, {
-            center: { lat: centerLat, lng: centerLng },
-            zoom: 20,
-        });
+                setMap(osmMap);
+            } else {
+                console.error(`Invalid coordinates for first point: ${JSON.stringify(firstPoint)}`);
+            }
+        }
+    }, [coordinates, map]);
 
-        numericCoordinates.forEach((coordinate, index) => {
-            new window.google.maps.Marker({
-                position: { lat: coordinate.lat, lng: coordinate.lng },
-                map: map,
-                label: `${index + 1}`,
-            });
-        });
+    useEffect(() => {
+        if (map) {
+            updateMarkers(); // Update markers when coordinates change
+        }
+    }, [coordinates, map]);
 
-        polylineRef.current = new window.google.maps.Polyline({
-            path: numericCoordinates,
-            geodesic: true,
-            strokeColor: "#0000FF",
-            strokeOpacity: 1.0,
-            strokeWeight: 3,
-        });
+    useEffect(() => {
+        return () => {
+            if (map) {
+                map.remove();
+            }
+        };
+    }, [map]);
 
-        polylineRef.current.setMap(map);
-    }, [numericCoordinates]);
-
-    return <div ref={mapRef} style={{ height: "600px", width: "400px" }} />;
+    return (
+        <div>
+            <div id="map" style={{ height: "600px", width: "400px" }}></div>
+            <style>
+                {`
+                .custom-marker {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background-color: #007bff;
+                    color: #fff;
+                    border-radius: 50%;
+                    width: 30px;
+                    height: 30px;
+                }
+                .marker-label {
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                `}
+            </style>
+        </div>
+    );
 };
 
-export default MapLine;
+export default OSMMap;

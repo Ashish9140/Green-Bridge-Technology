@@ -1,9 +1,15 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useContext } from "react";
+import { CartContext } from "../../CartContext";
 
 const Sidebar = () => {
     const navigate = useNavigate();
+    const { setTargetpoint } = useContext(CartContext);
     const handleClick = (e) => {
         let rt = (e.target.innerHTML).toLowerCase();
+        if (rt === "area" || rt === "line") {
+            setTargetpoint({ latitude: 0, longitude: 0 });
+        }
         navigate(`/mysnaps/${rt}`)
     }
     return (

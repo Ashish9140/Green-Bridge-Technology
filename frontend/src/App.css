@@ -345,6 +345,14 @@ th {
     font-size: 15px;
 }
 
+tr {
+    cursor: pointer;
+}
+
+tr:hover {
+    background: #8b979f;
+}
+
 
 .minmized-p {
     margin: 25px 10px 0px 10px;
