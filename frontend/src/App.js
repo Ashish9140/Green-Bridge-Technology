@@ -1,6 +1,6 @@
-import './App.css';
-import './Auth.css';
-import './Profile.css';
+import './css/App.css';
+import './css/Auth.css';
+import './css/Profile.css';
 import {
   BrowserRouter as Router,
   Routes, Route, Navigate
@@ -33,17 +33,11 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState(null);
   const [adminuser, setAdminuser] = useState(null);
-
-  const [targetpoint, setTargetpoint] = useState({ latitude: 0, longitude: 0 });
-
-
+  const [targetpoint, setTargetpoint] = useState({ latitude: 34.1234545, longitude: 74.8418371 });
   // for line and area snapping
   const [coordinates, setCoordinates] = useState([]);
-
-
-
-  let baseURL = "https://stchrom.tgb.software";
-  let alt = null;
+  const baseURL = "https://stchrom.tgb.software";
+  const alt = null;
 
   let user1 = {
     name: '',
@@ -113,6 +107,43 @@ const App = () => {
     })();
   }, []);
 
+  const handlePoint = (latitude, longitude) => {
+    const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+    window.open(googleMapsUrl, "_blank");
+  }
+
+  const handleMapLine = (latitude, longitude) => {
+    let prevLat = '';
+    let prevLng = '';
+    const newCoordinates = latitude.map((lat, index) => {
+      if (lat === '' || lat === prevLat || longitude[index] === prevLng) {
+        return null;
+      }
+      prevLat = lat;
+      prevLng = longitude[index];
+      return {
+        latitude: parseFloat(lat),
+        longitude: parseFloat(longitude[index]),
+      };
+    }).filter((coord) => coord !== null);
+  
+    if (newCoordinates.length === 1) {
+      const point = newCoordinates[0];
+      var mapUrl = `https://www.google.com/maps?q=${point.latitude},${point.longitude}`;
+      window.open(mapUrl, "_blank");
+    } else if (newCoordinates.length > 1) {
+      var baseUrl = 'https://www.google.com/maps/dir/';
+      var waypoints = newCoordinates.map(function (point) {
+        return point.latitude + ',' + point.longitude;
+      });
+      var start = waypoints[0];
+      var end = waypoints[waypoints.length - 1];
+      var waypointsStr = waypoints.slice(1, waypoints.length - 1).join('/');
+      var mapUrl = baseUrl + start + '/' + waypointsStr + '/' + end;
+      window.open(mapUrl, "_blank");
+    }
+  };
+  
 
   return (
     <CartContext.Provider value={{
@@ -120,7 +151,8 @@ const App = () => {
       formatTime, alt, auth, setAuth, users, setUsers,
       adminuser, setAdminuser,
       targetpoint, setTargetpoint,
-      coordinates, setCoordinates
+      coordinates, setCoordinates,
+      handleMapLine,handlePoint
     }}>
 
       <Router>

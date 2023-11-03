@@ -54,7 +54,7 @@ router.post('/take-photo', async (req, res) => {
         }
         console.log(data);
         insertFileData(data);
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -96,7 +96,7 @@ router.post('/take-snap', async (req, res) => {
         }
         console.log(data);
         insertFileData(data);
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -129,7 +129,7 @@ router.post('/audio', upload.single('audio'), async (req, res) => {
         }
         console.log(data);
         insertFileData(data);
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -164,9 +164,7 @@ router.post('/videowith', upload.single('videowith'), async (req, res) => {
 
         console.log(data);
         insertFileData(data);
-
-
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -200,7 +198,7 @@ router.post('/videowithout', upload.single('videowithout'), async (req, res) => 
         }
         console.log(data);
         insertFileData(data);
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -233,7 +231,7 @@ router.post('/screenwithout', upload.single('screenwithout'), async (req, res) =
         }
         console.log(data);
         insertFileData(data);
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -266,7 +264,7 @@ router.post('/screenwith', upload.single('screenwith'), async (req, res) => {
         }
         console.log(data);
         insertFileData(data);
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -298,7 +296,7 @@ router.post('/geo-snap', async (req, res) => {
         }
         console.log(data);
         insertFileData(data);
-        res.send({ message: "File Saved" });
+        res.send({ message: "File Saved", data });
     } catch (err) {
         res.send({ message: "Internal Server Error" });
     }
@@ -316,10 +314,6 @@ router.post('/aliasdata', async (req, res) => {
         client.execute(selectQuery, [alias])
             .then(result => {
                 const rows = result.rows;
-                console.log('Data:');
-                // rows.forEach(row => {
-                //     console.log(row);
-                // });
                 return res.send({ message: `your aliascode ${alias} files`, rows });
             });
     } catch (err) {
@@ -342,32 +336,22 @@ router.post('/aliasdata2', async (req, res) => {
             // video with audio recording
             // video without audio recording
             const fileTypesToQuery = ['video with audio recording', 'video without audio recording'];
-
-            for (const filetype of fileTypesToQuery) {
-                const selectQuery = 'SELECT * FROM files WHERE alias = ? AND filetype = ? ORDER BY event_time DESC ALLOW FILTERING';
-                const result = await client.execute(selectQuery, [alias, filetype]);
-                rows.push(...result.rows);
-            }
-
+            const selectQuery = 'SELECT * FROM files WHERE alias = ? AND filetype IN ? ORDER BY event_time DESC ALLOW FILTERING';
+            const result = await client.execute(selectQuery, [alias, fileTypesToQuery]);
+            rows.push(...result.rows);
         } else if (filetype === "screen") {
             // screen without audio recording
             // screen with audio recording
             const fileTypesToQuery = ['screen with audio recording', 'screen without audio recording'];
-
-            for (const filetype of fileTypesToQuery) {
-                const selectQuery = 'SELECT * FROM files WHERE alias = ? AND filetype = ? ORDER BY event_time DESC ALLOW FILTERING';
-                const result = await client.execute(selectQuery, [alias, filetype]);
-                rows.push(...result.rows);
-            }
+            const selectQuery = 'SELECT * FROM files WHERE alias = ? AND filetype IN ? ORDER BY event_time DESC ALLOW FILTERING';
+            const result = await client.execute(selectQuery, [alias, fileTypesToQuery]);
+            rows.push(...result.rows);
+            
         } else {
             const selectQuery = 'SELECT * FROM files WHERE alias = ? AND filetype = ? ORDER BY event_time DESC ALLOW FILTERING';
             const result = await client.execute(selectQuery, [alias, filetype]);
             rows.push(...result.rows);
         }
-
-        // rows.forEach(row => {
-        //     console.log(row);
-        // });
 
         return res.send({ rows });
     } catch (err) {
@@ -377,18 +361,8 @@ router.post('/aliasdata2', async (req, res) => {
 });
 
 
-router.get('/check', async (req, res) => {
-    try {
-        res.json({ message: "hello from check route" });
-    } catch (err) {
-        res.send({ message: "Internal Server Error" });
-    }
-});
-
-
 
 // user authetication routes
-
 // signup
 router.post("/signup", async (req, res) => {
     try {
@@ -586,7 +560,6 @@ router.post("/update", async (req, res) => {
         await client.execute(searchQuery, [alias])
             .then(result => {
                 user = result.rows[0];
-                // console.log(user);
             })
             .catch(error => {
                 console.error('Error searching user', error);

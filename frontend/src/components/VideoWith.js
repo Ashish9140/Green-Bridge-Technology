@@ -1,14 +1,21 @@
-import { useContext } from 'react';
+import { useContext,useState } from 'react';
 import React from 'react'
 import { CartContext } from '../CartContext';
+import Alert from './Alert';
 
 
 const VideoWith = () => {
-
-    const { auth, formatDate, formatTime, user, alt, baseURL } = useContext(CartContext);
+    const [alert, setAlert] = useState(false);
+    const { auth, formatDate, formatTime, user, baseURL } = useContext(CartContext);
 
     let duration = 0;
     let interval, intervalLoc;
+
+    const setAlertTime = (time) => {
+        setTimeout(() => {
+            setAlert(false);
+        }, time);
+    }
 
 
     const handleClick = async () => {
@@ -67,7 +74,6 @@ const VideoWith = () => {
                 }, 2000);
 
 
-
                 // setup media recorder 
                 let mediaRecorder = new MediaRecorder(mediaStreamObj);
 
@@ -120,10 +126,8 @@ const VideoWith = () => {
                         latitude[i] = latitude[i].toString();
                     }
                     for (let i = 0; i < longitude.length; i++) {
-                        // console.log(latitude[i]);
                         longitude[i] = longitude[i].toString();
                     }
-
 
 
 
@@ -134,14 +138,13 @@ const VideoWith = () => {
                     formData.append("date", date);
                     formData.append("time", time);
 
+                    // appending location into form data
                     if (latitude.length === 1) {
                         formData.append('latitude', '');
                     }
                     latitude.forEach((latitude, index) => {
                         formData.append('latitude', latitude);
                     });
-
-
                     if (latitude.length === 1) {
                         formData.append("longitude", '');
                     }
@@ -167,7 +170,11 @@ const VideoWith = () => {
                         method: 'POST',
                         body: formData
                     }).then((response) => response.json())
-                        .then((data) => console.log(data));
+                        .then((data) => {
+                            console.log(data);
+                            setAlert(true);
+                            setAlertTime(2000);
+                        });
 
                     videoWithAudio.srcObject = null;
                 }
@@ -194,6 +201,7 @@ const VideoWith = () => {
 
     return (
         <div className="videoWithAudio-sec">
+            {alert ? <Alert text="File Saved" /> : ""}
             <h3>Video With Audio</h3>
             <div>
                 <video autoPlay muted className="videoWithAudioCtr"></video>

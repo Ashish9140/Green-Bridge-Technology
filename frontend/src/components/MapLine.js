@@ -3,7 +3,7 @@ import { CartContext } from "../CartContext";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const OSMMap = () => {
+const MapLine = () => {
     const { coordinates } = useContext(CartContext);
     const [map, setMap] = useState(null);
     const markersRef = useRef([]);
@@ -98,4 +98,4 @@ const OSMMap = () => {
     );
 };
 
-export default OSMMap;
+export default MapLine;

@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const router = require('./routes');
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.use(express.json({ limit: '8mb' }));
 
 const cors = require('cors');

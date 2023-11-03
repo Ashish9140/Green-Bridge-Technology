@@ -8,7 +8,11 @@ const Sidebar = () => {
     const handleClick = (e) => {
         let rt = (e.target.innerHTML).toLowerCase();
         if (rt === "area" || rt === "line") {
-            setTargetpoint({ latitude: 0, longitude: 0 });
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                let lt = pos.coords.latitude;
+                let ln = pos.coords.longitude;
+                setTargetpoint({ latitude: lt, longitude: ln });
+            })
         }
         navigate(`/mysnaps/${rt}`)
     }

@@ -1,14 +1,19 @@
-import { useContext } from 'react';
+import { useContext ,useState} from 'react';
 import React from 'react'
 import { CartContext } from '../CartContext';
+import Alert from './Alert';
 
 const VideoWithout = () => {
-
-    const { auth, formatDate, formatTime, user, alt, baseURL } = useContext(CartContext);
-
+    const [alert, setAlert] = useState(false);
+    const { auth, formatDate, formatTime, user, baseURL } = useContext(CartContext);
     let duration = 0;
     let interval, intervalLoc;
 
+    const setAlertTime = (time) => {
+        setTimeout(() => {
+            setAlert(false);
+        }, time);
+    }
 
     const handleClick = async () => {
         await navigator.mediaDevices.getUserMedia({ audio: false, video: true })
@@ -53,7 +58,7 @@ const VideoWithout = () => {
                         let size = latitude.length;
                         let lt = pos.coords.latitude;
                         let ln = pos.coords.longitude;
-                        console.log(lt, ln);
+                        // console.log(lt, ln);
                         if (size !== 0) {
                             if (Math.abs(lt - latitude[size - 1]) > 0.0001 || Math.abs(ln - longitude[size - 1]) > 0.0001) {
                                 latitude.push(lt);
@@ -125,14 +130,14 @@ const VideoWithout = () => {
                     formData.append("date", date);
                     formData.append("time", time);
 
+
+                    // appendin location into form data
                     if (latitude.length === 1) {
                         formData.append('latitude', '');
                     }
                     latitude.forEach((latitude, index) => {
                         formData.append('latitude', latitude);
                     });
-
-
                     if (latitude.length === 1) {
                         formData.append("longitude", '');
                     }
@@ -140,9 +145,9 @@ const VideoWithout = () => {
                         formData.append("longitude", longitude);
                     });
 
+
                     formData.append("duration", duration);
                     formData.append("alias", auth.user.alias);
-
                     formData.append("ip", user.ip);
                     formData.append("iptype", user.iptype);
                     formData.append("devicebrand", user.device.brand);
@@ -158,7 +163,11 @@ const VideoWithout = () => {
                         method: 'POST',
                         body: formData
                     }).then((response) => response.json())
-                        .then((data) => console.log(data));
+                        .then((data) => {
+                            console.log(data);
+                            setAlert(true);
+                            setAlertTime(2000);
+                        });
 
                     videoWithoutAudio.srcObject = null;
                 }
@@ -185,6 +194,7 @@ const VideoWithout = () => {
 
     return (
         <div className="videoWithoutAudio-sec">
+            {alert ? <Alert text="File Saved" /> : ""}
             <h3>Video Without Audio</h3>
             <div className="inner-record">
                 <video autoPlay muted className="videoWithoutAudioCtr"></video>

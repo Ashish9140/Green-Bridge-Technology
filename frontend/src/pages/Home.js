@@ -1,7 +1,6 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useRef } from 'react';
 import { CartContext } from '../CartContext';
 import { useNavigate } from 'react-router-dom';
-
 import { getUsers } from '../http';
 
 import TakePhoto from '../components/TakePhoto';
@@ -15,15 +14,28 @@ import Loader from './../components/Loader';
 import Alert from '../components/Alert';
 
 const Home = () => {
-
+    const [alert, setAlert] = useState(false);
     const navigate = useNavigate();
     const [load, setLoad] = useState(false);
-    const [alert, setAlert] = useState(false);
     const [value, setvalue] = useState('');
     const { formatDate, formatTime, user, alt, baseURL, auth, setUsers } = useContext(CartContext);
-    let latitudeL = [], longitudeL = [], timeStampL = [];
-    let latitudeA = [], longitudeA = [], timeStampA = [];
 
+    // line capture values
+    let latitudeL = useRef([]);
+    let longitudeL = useRef([]);
+    let timeStampL = useRef([]);
+
+
+    // line capture values
+    let latitudeA = useRef([]);
+    let longitudeA = useRef([]);
+    let timeStampA = useRef([]);
+
+    const setAlertTime = (time) => {
+        setTimeout(() => {
+          setAlert(false);
+        }, time);
+      }
 
 
     // other functions
@@ -76,7 +88,12 @@ const Home = () => {
                             ostype: user.os.type,
                         })
                     }).then((response) => response.json())
-                        .then((data) => console.log(data));
+                        .then((data) => {
+                            console.log(data);
+                            //setvalue(`File Saved`);
+                            setAlert(true);
+                            setAlertTime(2000);
+                        });
 
                 });
 
@@ -89,24 +106,21 @@ const Home = () => {
             }, 5000);
         })
     }
-
-
-
-
     const handleLine = async () => {
         navigator.geolocation.getCurrentPosition(function (pos) {
             let lt = pos.coords.latitude;
             let ln = pos.coords.longitude;
-            latitudeL.push(lt.toString());
-            longitudeL.push(ln.toString());
-            console.log(lt, ln);
+            latitudeL.current.push(lt.toString());
+            longitudeL.current.push(ln.toString());
+            // console.log(lt, ln);
             let date = formatDate();
             let time = formatTime();
-            timeStampL.push(`${date} ${time}`);
+            timeStampL.current.push(`${date} ${time}`);
             console.log("Point Captured")
-            console.log(latitudeL.length)
-            // setvalue(`${latitudeL.length} Line Point Captured`);
-            // setAlert(true);
+            console.log(latitudeL.current.length)
+            setvalue(`${latitudeL.current.length} Line Point Captured`);
+            setAlert(true);
+            setAlertTime(3000);
         })
     }
     const handleStop = async () => {
@@ -127,7 +141,7 @@ const Home = () => {
                     "Content-type": "application/json; charset=UTF-8"
                 },
                 body: JSON.stringify({
-                    filename: fileName, date, time, latitude: latitudeL, longitude: longitudeL, alias: auth.user.alias, timestamp: timeStampL,
+                    filename: fileName, date, time, latitude: latitudeL.current, longitude: longitudeL.current, alias: auth.user.alias, timestamp: timeStampL.current,
                     ip: user.ip,
                     filetype: "line snap",
                     iptype: user.iptype,
@@ -143,45 +157,47 @@ const Home = () => {
             }).then((response) => response.json())
                 .then((data) => {
                     console.log(data);
-                    latitudeL = [];
-                    longitudeL = [];
-                    timeStampL = [];
+                    latitudeL.current = [];
+                    longitudeL.current = [];
+                    timeStampL.current = [];
+                    setvalue(`File Saved`);
+                    setAlert(true);
+                    setAlertTime(2000);
                 });
+        } else {
+            console.log("Nothing is captured");
         }
     }
-
-
-
-
     const handleArea = async () => {
         navigator.geolocation.getCurrentPosition(function (pos) {
             let lt = pos.coords.latitude;
             let ln = pos.coords.longitude;
-            latitudeA.push(lt.toString());
-            longitudeA.push(ln.toString());
+            latitudeA.current.push(lt.toString());
+            longitudeA.current.push(ln.toString());
             let date = formatDate();
             let time = formatTime();
-            timeStampA.push(`${date} ${time}`);
+            timeStampA.current.push(`${date} ${time}`);
             console.log("Point Captured")
-            // setvalue(`${latitudeL.length} Area Point Captured`);
-            // setAlert(true);
+            setvalue(`${latitudeA.current.length} Area Point Captured`);
+            setAlert(true);
+            setAlertTime(3000);
         })
     }
     const handleStop2 = async () => {
         if (latitudeA.length !== 0) {
             let fileName = prompt("Enter file name", "area-snap");
-            latitudeA.push(latitudeA[0]);
-            longitudeA.push(longitudeA[0]);
+            latitudeA.current.push(latitudeA.current[0]);
+            longitudeA.current.push(longitudeA.current[0]);
             let date = formatDate();
             let time = formatTime();
-            timeStampA.push(`${date} ${time}`);
+            timeStampA.current.push(`${date} ${time}`);
             fetch(`${baseURL}/geo-snap`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json; charset=UTF-8"
                 },
                 body: JSON.stringify({
-                    filename: fileName, date, time, latitude: latitudeA, longitude: longitudeA, alias: auth.user.alias, timestamp: timeStampA,
+                    filename: fileName, date, time, latitude: latitudeA.current, longitude: longitudeA.current, alias: auth.user.alias, timestamp: timeStampA.current,
                     ip: user.ip,
                     filetype: "area snap",
                     iptype: user.iptype,
@@ -197,17 +213,17 @@ const Home = () => {
             }).then((response) => response.json())
                 .then((data) => {
                     console.log(data);
-                    latitudeA = [];
-                    longitudeA = [];
-                    timeStampA = [];
+                    latitudeA.current = [];
+                    longitudeA.current = [];
+                    timeStampA.current = [];
+                    setvalue(`File Saved`);
+                    setAlert(true);
+                    setAlertTime(2000);
                 });
+        } else {
+            console.log("Nothing is captured");
         }
     }
-
-
-
-
-
     const handleMySnaps = () => {
         navigate("/mysnaps");
     }
@@ -230,9 +246,7 @@ const Home = () => {
 
     return (
         <div>
-            {/* {<div className='alrt'>
-                {value}
-            </div>} */}
+            {alert ? <Alert text={value} /> : ""}
             <div className="container">
                 <div className="btns">
                     <img src="images/logo2.png" alt="logo" className='logo' />

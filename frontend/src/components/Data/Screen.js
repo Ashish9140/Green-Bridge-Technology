@@ -5,14 +5,14 @@ import { CartContext } from "../../CartContext";
 import Loader from "../Loader";
 
 const Screen = () => {
-    const { auth, baseURL } = useContext(CartContext);
+    const { auth, baseURL,handlePoint,handleMapLine } = useContext(CartContext);
     const [data, setData] = useState(null);
     const [load, setLoad] = useState(true);
     useEffect(() => {
         (async () => {
             try {
                 const { data } = await aliasData({ alias: auth.user.alias, filetype: "screen" });
-                // console.log(data.rows);
+                console.log(data.rows);
                 setData(data.rows);
                 setLoad(false);
             } catch (err) {
@@ -39,7 +39,7 @@ const Screen = () => {
                         <div className="main-sec" style={{ display: "inline-block", width: "100%", overflowY: "scroll" }}>
 
                             {
-                                (data !== null) ?
+                                (data !== null) &&
                                     data.map((element, index) => {
                                         return (
                                             <div key={index}>
@@ -70,33 +70,34 @@ const Screen = () => {
                                                         <thead>
                                                             <tr>
                                                                 <th>Latitude</th>
-                                                                <th>Longitude</th>
-                                                                {/* <th>Job Title</th>
-                                                            <th>Twitter</th> */}
+                                                                <th className="iconp">
+                                                                    Longitude
+                                                                    <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handleMapLine(element.latitude, element.longitude) }} />
+                                                                </th>
                                                             </tr>
                                                         </thead>
                                                         {
-                                                            element.latitude.map((item, index) => {
-                                                                if (item !== '')
-                                                                    return (
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td>{item}</td>
-                                                                                <td>{element.longitude[index]}</td>
-                                                                                {/* <td data-column="Job Title">Chief Sandwich Eater</td>
-                                                            <td data-column="Twitter">@james</td> */}
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    )
-                                                            })
+                                                            (element.latitude) &&
+                                                                element.latitude.map((item, index) => {
+                                                                    if (item !== '')
+                                                                        return (
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td>{item}</td>
+                                                                                    <td className="iconp">
+                                                                                        {element.longitude[index]}
+                                                                                        <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handlePoint(item, element.longitude[index]) }} />
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        )
+                                                                })
                                                         }
                                                     </table>
                                                 </div>
                                             </div>
                                         )
                                     })
-                                    :
-                                    ''
                             }
                         </div>
                 }

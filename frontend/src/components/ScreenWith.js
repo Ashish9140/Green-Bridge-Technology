@@ -1,14 +1,21 @@
-import { useContext } from 'react';
+import { useContext,useState } from 'react';
 import React from 'react'
 import { CartContext } from '../CartContext';
+import Alert from './Alert';
 
 
 const ScreenWith = () => {
-
-    const { auth, formatDate, formatTime, user, alt, baseURL } = useContext(CartContext);
+    const [alert, setAlert] = useState(false);
+    const { auth, formatDate, formatTime, user, baseURL } = useContext(CartContext);
 
     let duration = 0;
     let interval, intervalLoc;
+
+    const setAlertTime = (time) => {
+        setTimeout(() => {
+            setAlert(false);
+        }, time);
+    }
 
     const handleClick = async () => {
         var screenConstraints = { video: true, audio: true };
@@ -217,7 +224,11 @@ const ScreenWith = () => {
                             method: 'POST',
                             body: formData
                         }).then((response) => response.json())
-                            .then((data) => console.log(data));
+                            .then((data) => {
+                                console.log(data);
+                                setAlert(true);
+                                setAlertTime(2000);
+                            });
 
                         screenWithAudio.srcObject = null;
                     }
@@ -248,6 +259,7 @@ const ScreenWith = () => {
 
     return (
         <div className="screenWithAudio-sec">
+            {alert ? <Alert text="File Saved" /> : ""}
             <h3>Screen With Audio</h3>
             <div>
                 <video autoPlay muted className="screenWithAudioCtr"></video>

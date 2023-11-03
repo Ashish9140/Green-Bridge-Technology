@@ -1,14 +1,21 @@
-import { useContext } from 'react';
+import { useContext,useState } from 'react';
 import React from 'react'
 import { CartContext } from '../CartContext';
+import Alert from './Alert';
 
 const ScreenWithout = () => {
-
-    const { auth, formatDate, formatTime, user, alt, baseURL } = useContext(CartContext);
+    const [alert, setAlert] = useState(false);
+    const { auth, formatDate, formatTime, user, baseURL } = useContext(CartContext);
 
 
     let duration = 0;
     let interval, intervalLoc;
+
+    const setAlertTime = (time) => {
+        setTimeout(() => {
+            setAlert(false);
+        }, time);
+    }
 
     const handleClick = async () => {
         await navigator.mediaDevices.getDisplayMedia({
@@ -161,7 +168,11 @@ const ScreenWithout = () => {
                     method: 'POST',
                     body: formData
                 }).then((response) => response.json())
-                    .then((data) => console.log(data));
+                    .then((data) => {
+                        console.log(data);
+                        setAlert(true);
+                        setAlertTime(2000);
+                    });
 
                 screenWithoutAudio.srcObject = null;
             }
@@ -188,6 +199,7 @@ const ScreenWithout = () => {
 
     return (
         <div className="screenWithoutAudio-sec">
+            {alert ? <Alert text="File Saved" /> : ""}
             <h3>Screen Without Audio</h3>
             <div>
                 <video autoPlay muted className="screenWithoutAudioCtr"></video>

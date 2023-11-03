@@ -1,11 +1,17 @@
-import { useContext } from 'react';
+import { useContext,useState } from 'react';
 import React from 'react'
 import { CartContext } from '../CartContext';
+import Alert from './Alert';
 
 const TakePhoto = () => {
+    const [alert, setAlert] = useState(false);
+    const { formatDate, formatTime, user, baseURL, auth, alt} = useContext(CartContext);
 
-    const { formatDate, formatTime, user, alt, baseURL, auth } = useContext(CartContext);
-
+    const setAlertTime = (time) => {
+        setTimeout(() => {
+            setAlert(false);
+        }, time);
+    }
     // Navigator video stream
     const handleClick = async () => {
         try {
@@ -84,7 +90,11 @@ const TakePhoto = () => {
                             ostype: user.os.type,
                         })
                     }).then((response) => response.json())
-                        .then((data) => console.log(data));
+                        .then((data) => {
+                            console.log(data);
+                            setAlert(true);
+                            setAlertTime(2000);
+                        });
                 });
 
                 ssTracks.forEach((track) => {
@@ -101,6 +111,7 @@ const TakePhoto = () => {
 
     return (
         <div className="ss-sec">
+            {alert ? <Alert text="File Saved" /> : ""}
             <h3>Take Photo</h3>
             <div>
                 <video autoPlay className="ssCtr"></video>

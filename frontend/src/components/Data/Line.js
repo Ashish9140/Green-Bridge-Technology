@@ -3,12 +3,11 @@ import Sidebar from "./Sidebar"
 import { useEffect, useContext, useState } from "react";
 import { CartContext } from "../../CartContext";
 import Loader from "../Loader";
-
 import Map from "../Map";
 import MapLine from "../MapLine";
 
 const Line = () => {
-    const { auth, setTargetpoint, setCoordinates } = useContext(CartContext);
+    const { auth, setTargetpoint, setCoordinates, handlePoint, handleMapLine } = useContext(CartContext);
     const [data, setData] = useState(null);
     const [load, setLoad] = useState(true);
 
@@ -37,17 +36,10 @@ const Line = () => {
         }
     }
 
-    const handlePoint = (latitude, longitude) => {
-        // setTargetpoint({ latitude, longitude });
-        setMapLine(false);
-        const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-        window.open(googleMapsUrl, "_blank");
-    }
-
     const handleHoverClick = (element, latitude, longitude) => {
         setTargetpoint({ latitude, longitude });
         setMapLine(false);
-        console.log(element, latitude, longitude);
+        // console.log(element, latitude, longitude);
     }
 
     const handleLine = (latitude, longitude) => {
@@ -69,6 +61,7 @@ const Line = () => {
     }
 
 
+
     return (
         <div>
             <div className="mapDiv">
@@ -79,7 +72,7 @@ const Line = () => {
                         <div className="main-sec" style={{ display: "inline-block", width: "100%", overflowY: "scroll" }}>
 
                             {
-                                (data !== null) ?
+                                (data !== null) &&
                                     data.map((element, index) => {
                                         return (
                                             <div key={index}>
@@ -106,41 +99,46 @@ const Line = () => {
                                                                 <th>Timestamp</th>
                                                                 <th className="iconp">
                                                                     Altitude(in Meter)
-                                                                    <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handleLine(element.latitude, element.longitude) }} />
+                                                                    <div>
+                                                                        <img src="/images/compass.png" alt="map-icon" className="icon" onClick={() => { handleLine(element.latitude, element.longitude) }} />
+                                                                        <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handleMapLine(element.latitude, element.longitude) }} />
+                                                                    </div>
                                                                 </th>
                                                             </tr>
                                                         </thead>
                                                         {
-                                                            element.latitude.map((item, index) => {
-                                                                if (item !== '')
-                                                                    return (
-                                                                        <tbody>
-                                                                            <tr onClick={(e) => { handleHoverClick(e.target, item, element.longitude[index]) }}>
-                                                                                <td>{item}</td>
-                                                                                <td>{element.longitude[index]}</td>
-                                                                                <td>{element.timestamp[index]}</td>
-                                                                                <td className="iconp">
-                                                                                    {
-                                                                                        (element.altitude) ?
-                                                                                            element.altitude[index]
-                                                                                            :
-                                                                                            "no data"
-                                                                                    }
-                                                                                    <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handlePoint(item, element.longitude[index]) }} />
-                                                                                </td>
+                                                            (element.latitude) &&
+                                                                element.latitude.map((item, index) => {
+                                                                    if (item !== '')
+                                                                        return (
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td>{item}</td>
+                                                                                    <td>{element.longitude[index]}</td>
+                                                                                    <td>{element.timestamp[index]}</td>
+                                                                                    <td className="iconp">
+                                                                                        {
+                                                                                            (element.altitude) ?
+                                                                                                element.altitude[index]
+                                                                                                :
+                                                                                                "no data"
+                                                                                        }
+                                                                                        <div>
+                                                                                            <img src="/images/compass.png" alt="map-icon" className="icon" onClick={(e) => { handleHoverClick(e.target, item, element.longitude[index]) }} />
+                                                                                            <img src="/images/map.png" alt="map-icon" className="icon" onClick={() => { handlePoint(item, element.longitude[index]) }} />
+                                                                                        </div>
+                                                                                    </td>
 
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    )
-                                                            })
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        )
+                                                                })
                                                         }
                                                     </table>
                                                 </div>
                                             </div>
                                         )
                                     })
-                                    :
-                                    ''
                             }
                         </div>
                     }
